@@ -435,6 +435,13 @@ class ArduCAM
 	void OV5642_set_JPEG_size(uint8_t size);
 	void OV5640_set_JPEG_size(uint8_t size);
 	
+	void OV2640_set_agc_enable(uint8_t enable);
+	void OV2640_set_gain(uint8_t gain);
+	void OV2640_set_aec_enable(uint8_t enable);
+	void OV2640_set_exposure(int percent);
+	void OV2640_set_awb_enable(uint8_t enable);
+	void OV2640_set_reg_bits(uint8_t bank, uint8_t reg, uint8_t offset, uint8_t mask, uint8_t value);
+
 	void OV5642_set_RAW_size (uint8_t size);
 	
 	
