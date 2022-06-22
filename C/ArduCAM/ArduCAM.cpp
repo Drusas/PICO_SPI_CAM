@@ -603,6 +603,52 @@ void ArduCAM::OV2640_set_agc_enable(uint8_t enable)
 	OV2640_set_reg_bits(BANK_SENSOR, COM8, 0, COM8_AGC_EN, enable ? 1:0);
 }
 
+void ArduCAM::OV5642_set_exposure(int percent)
+{
+	// convert to # of rows
+	int exposure = (int)((1944 * percent) / 100);
+    if (exposure < 0) {
+        exposure = 0;
+    } else if (exposure > 1944) {
+        exposure = 1944;
+    }
+
+	// enable manual exposure
+	wrSensorReg16_8(0x3503, 0x05);
+
+	// set the value
+	// multiply by 16 to set manuaul exposure value
+	int actual = 16 * exposure;
+	uint8_t high = actual >> 8 & 0xFF;
+	uint8_t low = actual >> 0 & 0xFF;
+	wrSensorReg16_8(0x3500, 0x00);
+	wrSensorReg16_8(0x3501, high);
+	wrSensorReg16_8(0x3502, low);
+}
+
+void ArduCAM::OV5642_set_gain(uint8_t percent)
+{
+	// convert to # of rows
+	int gain = (int)((511 * percent) / 100);
+    if (gain < 1) {
+        gain = 1;
+    } else if (gain > 511) {
+        gain = 511;
+    }
+
+	// enable manual gain
+	uint8_t c_value;
+	rdSensorReg16_8(0x3503, &c_value);
+	uint8_t n_value = c_value | 0x02;  // Bit[1] = 1 to enable manual agc
+	wrSensorReg16_8(0x3503, n_value);
+
+	// set the gain value
+	uint8_t high = gain >> 8 & 0xFF;
+	uint8_t low = gain >> 0 & 0xFF;
+	wrSensorReg16_8(0x350A, high);
+	wrSensorReg16_8(0x350B, low);
+}
+
 const uint8_t agc_gain_tbl[31] = {
     0x00, 0x10, 0x18, 0x30, 0x34, 0x38, 0x3C, 0x70, 0x72, 0x74, 0x76, 0x78, 0x7A, 0x7C, 0x7E, 0xF0,
     0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF
